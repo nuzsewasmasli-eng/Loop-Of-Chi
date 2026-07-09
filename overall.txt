@@ -1,0 +1,1401 @@
+//=====index.html=====
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loop of Chi</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <!-- START GAME POPUP -->
+    <div id="startScreen" class="popup active">
+        <div class="menu-card">
+            <h1 class="game-title">LOOP OF CHI</h1>
+            <div class="section">
+                <h3>Cara Main</h3>
+                <p>Tank menembak otomatis ke musuh terdekat. Kalahkan musuh, dapatkan EXP, naik level dan pilih
+                    kartu untuk memperkuat diri. semakin tinggi level player, semakin banyak dan besar HP musuh.<br>
+                <strong>bisa saja tembakannya tidak akurat</strong></p>
+            </div>
+            <div class="section">
+                <h3>Kartu & Upgrade</h3>
+                <p>Setiap naik level, kamu memilih 1 dari 3 kartu acak. Kartu bisa bertumpuk, yang membuat player makin kuat seiring berjalannya permainan.</p>
+            </div>
+            <div class="section">
+                <h3>Jenis Musuh</h3>
+                <p>🔴 Merah:lambat, HP tinggi, Attack besar-lambat<br>
+                    🟡 Kuning:normal, HP normal, Attack normal-normal<br>
+                    🟢 Hijau:cepat, HP rendah, Attack kecil-cepat</p>
+            </div>
+            <div class="section">
+                <h3>Pilih Level Awal</h3>
+                <select id="startLevel">
+                    <option value="">-- Pilih Level --</option>
+                    <option value="Easy">Easy</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Hard">Hard</option>  
+                </select>
+                <button id="startBtn" disabled>Mulai Game</button>
+            </div>
+        </div>
+    </div>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="400" height="680" style="display:none;"></canvas>
+    </div>
+    <!-- GAME OVER POPUP -->
+    <div id="gameOverScreen" class="popup">
+        <div class="menu-card">
+            <h1 class="game-title">GAME OVER</h1>
+            <div class="section">
+                <p>Tembok hancur. Pertahanan gagal.</p>
+            </div>
+            <button id="restartBtn">Restart</button>
+        </div>
+    </div>
+    <script type="module" src="./canvas.js"></script>
+</body>
+</html>
+
+//=====end of index.html=====
+
+//=====style.css=====
+
+::-webkit-scrollbar {display: none;}
+
+body {
+    color: white;
+    background-color: rgb(0, 0, 0);
+}
+
+.popup {
+    display: none;
+}
+
+.popup.active {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,5,10,0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.menu-card {
+  width: min(90vw, 450px);
+  background: linear-gradient(180deg, #151525, #0b0b15);
+  border-radius: 15px;
+  padding: 25px;
+  animation: bordershadow 1.5s ease infinite;
+}
+
+.game-title {
+  text-align: center;
+  margin-bottom: 18px;
+  letter-spacing: 1px;
+}
+
+.section {
+  margin: 8px;
+}
+
+.section h3 {
+  font-size: 21px;
+  margin-bottom: 2px;
+  color: #9ddcff;
+}
+
+.section p {
+  font-size: 17px;
+  opacity: 0.85;
+}
+
+select, button {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+}
+
+#startBtn,
+#restartBtn {
+  background: #2ecc71;
+  color: black;
+  font-weight: bold;
+}
+
+#startBtn:disabled,
+#restartBtn:disabled {
+  background: #555;
+  color: #999;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+#startBtn:not(:disabled):hover,
+#restartBtn:not(:disabled):hover {
+  animation: doki 0.8s ease infinite;
+}
+
+#gameCanvas {
+  background: black;
+  border-radius: 10px;
+  animation: BS 4s ease infinite;
+}
+
+#game-container {
+  position: relative;      
+  width: 400px;
+  height: 680px;
+  margin: auto;
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#cardOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+}
+
+.card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.card {
+  all: unset;              
+  box-sizing: border-box;
+  width: 260px;
+  height: 120px;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: white;
+  background: #1e1e1e;
+  border: 3px solid;
+  box-shadow: 0 0 12px #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card.common{
+  border-color: #777;
+  box-shadow: 0 0 12PX #555;
+}
+
+.card.rare{
+  border-color: #3da5ff;
+  box-shadow: 0 0 14px #3da5ff;
+}
+
+.card.epic{
+  border-color: #b36bff;
+  box-shadow: 0 0 16px #b36bff;
+}
+
+.card.legendary{
+  border-color: #ffcc33;
+  box-shadow: 0 0 18px #ffcc33;
+}
+
+.card.mythic{
+  border-color: #ff4d4d;
+  box-shadow: 0 0 20px #ff4d4d;
+}
+
+.card.secret{
+  border-color: #2fffd5;
+  box-shadow: 0 0 22px #2fffd5;
+}
+
+@keyframes bordershadow {
+  0% {box-shadow: 0 0px 60px greenyellow; border: 3px solid greenyellow;}
+  25% {box-shadow: 0 0px 60px rgb(255, 255, 255); border: 3px solid rgb(255, 255, 255);}
+  50% {box-shadow: 0 0px 60px greenyellow; border: 3px solid greenyellow;} 
+  75% {box-shadow: 0 0px 60px rgb(255, 255, 255); border: 3px solid rgb(255, 255, 255);}
+  100% {box-shadow: 0 0px 60px greenyellow; border: 3px solid greenyellow;}
+}
+
+@keyframes doki {
+  50% {background: #38ff87; transform: translateY(-0.4px) scale(1.02); box-shadow: 0 0 25px white;}
+}
+
+@keyframes BS {
+  0% {box-shadow: 0 0px 60px rgb(255, 0, 0); border: 3px solid rgb(255, 0, 0)}
+  17% {box-shadow: 0 0px 60px greenyellow; border: 3px solid greenyellow}
+  34% {box-shadow: 0 0px 60px cyan; border: 3px solid cyan;}
+  51% {box-shadow: 0 0px 60px red; border: 3px solid red;}
+  68% {box-shadow: 0 0px 60px greenyellow; border: 3px solid greenyellow;}
+  85% {box-shadow: 0 0px 60px cyan; border: 3px solid cyan;}
+  100% {box-shadow: 0 0px 60px red; border: 3px solid red;}
+}
+
+//=====end of style.css=====
+
+//=====ui.js=====
+
+const startScreen = document.getElementById("startScreen");
+const gameOverScreen = document.getElementById("gameOverScreen");
+const startBtn = document.getElementById("startBtn");
+const startLevel = document.getElementById("startLevel");
+const restartBtn = document.getElementById("restartBtn");
+const gameCanvas = document.getElementById("gameCanvas");
+const ownedOnceCards = new Set();
+
+let isGameRunning = false;
+
+startBtn.disabled = true;
+
+startLevel.addEventListener("change", () => {
+  startBtn.disabled = startLevel.value === "";
+});
+
+startBtn.addEventListener("click", () => {
+  const lv = startLevel.value.trim();
+  if (!lv) return;
+
+  startScreen.classList.remove("active");
+  gameCanvas.style.display = "block";
+
+  spawnConfig.setLevel(lv);
+  startGame(lv);
+});
+
+function showGameOver() {
+  isGameRunning = false;
+  setOwnedOnceCards(ownedOnceCards);
+  gameOverScreen.classList.add("active");
+  document.getElementById("gameCanvas").style.display = "none";
+}
+
+restartBtn.addEventListener("click", () => {
+  gameOverScreen.classList.remove("active");
+  startScreen.classList.add("active");
+});
+
+export { isGameRunning, showGameOver };
+
+function startGame(level) {
+
+  resetGameTimers();
+  isGameRunning = true;
+
+  resetLastTime();   
+  resetEnemyTimer();   
+}
+
+function applyCardEffect(card) {
+  if (card.type === "once") {
+    ownedOnceCards.add(card.id);
+    setOwnedOnceCards(ownedOnceCards);
+  }
+  switch (card.id) {
+    case "explosive_round": playerEffects.explosive = true; break;
+    case "double_shot": playerEffects.doubleShot = true; break;
+    case "burn_shot": playerEffects.burnChance += 0.1; break;
+    case "atk_up_1": player.damage += 2; break;
+    case "atk_up_2": player.damage += 4; break;
+    case "atk_up_3": player.damage += 7; break;
+    case "atk_up_legend": player.damage += 12; break;
+    case "enemy_hp_up":
+      increaseEnemyHpMultiplier(0.5);
+      increaseEnemyExpMultiplier(0.4);
+      break;
+    case "slow_down": multiplyEnemySpeedMultiplier(0.8); break;
+    case "adrenaline_rush": playerEffects.adrenalineRush = true; break;
+    case "AI_Accuration": playerEffects.secretAim = true; break;
+  }
+}
+
+function showCardSelection(cards) {
+  const overlay = document.createElement("div");
+  overlay.id = "cardOverlay";
+  overlay.innerHTML = `
+    <div class="card-container">
+      ${cards.map((c, i) => `
+        <button class="card ${c.rarity}" data-index="${i}">
+          <b>${c.rarity.toUpperCase()}</b><br>
+          ${c.label}
+        </button>
+      `).join("")}
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener("click", (e) => {
+    if (!e.target.classList.contains("card")) return;
+    const idx = e.target.dataset.index;
+    const chosen = cards[idx];
+    applyCardEffect(chosen);
+    overlay.remove();
+    setGamePaused(false);
+  });
+}
+
+window.addEventListener("player-level-up", (e) => {
+  setGamePaused(true);
+  const cards = rollThreeCards();
+  showCardSelection(cards);
+});
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "p") {
+    setGamePaused(true);
+  }
+  if (e.key === "o") {
+    setGamePaused(false);
+
+  }
+});
+
+import {
+  playerEffects,
+  player 
+} from "./player.js";
+
+import {
+  resetGameTimers,
+  resetLastTime,
+  spawnConfig,
+  setGamePaused
+} from "./canvas.js";
+
+import {
+  resetEnemyTimer,
+  increaseEnemyHpMultiplier,
+  increaseEnemyExpMultiplier,
+  multiplyEnemySpeedMultiplier
+} from "./enemy.js";
+
+import {
+  rollThreeCards,
+  setOwnedOnceCards
+} from "./card.js";
+
+//=====end of ui.js======
+
+//=====canvas.js=====
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let lastTime = 0;
+let isGamePaused = false;
+
+function resetGameTimers() {
+    lastTime = performance.now();
+    enemyTimer = 0;
+}
+
+export const spawnConfig = {
+    level: "Easy",
+
+    configs: {
+        Easy: { rate: 3000, max: 4 },
+        Normal: { rate: 1500, max: 4 },
+        Hard: { rate: 1000, max: 4 }
+    },
+
+    get() {
+        return this.configs[this.level];
+    },
+
+    setLevel(lv) {
+        this.level = lv;
+        syncSpawnRate();
+    }
+};
+
+export function setGamePaused(state) {
+    isGamePaused = state;
+}
+
+export function syncSpawnRate() {
+    const cfg = spawnConfig.get();
+    if (!cfg) {
+
+        return;
+    }
+    enemyRespawnTime = spawnConfig.get().rate;
+}
+
+let enemyHpMultiplier = 1;
+let enemyExpMultiplier = 1;
+
+let enemyRespawnTime = 2000;
+let enemyTimer = 0;
+
+const wall = {
+    y: 530,
+    height: 20,
+    hp: 1000,
+    maxHp: 1000
+};
+
+function resizeCanvas() {
+    canvas.width = 400;
+    canvas.height = 680;
+}
+
+function renderWall(ctx) {
+
+    ctx.fillStyle = "#ff0000ff";
+    ctx.fillRect(0, wall.y, canvas.width, wall.height);
+
+    ctx.fillStyle = "#ff0000ff";
+    ctx.font = "14px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(
+        `WALL HP: ${Math.floor(wall.hp)} / ${wall.maxHp}`,
+        canvas.width / 2,
+        wall.y + 33
+    );
+}
+
+export function spawnEnemy(delta) {
+    enemyTimer += delta;
+
+    const cfg = spawnConfig.get();
+
+    if (enemyTimer < cfg.rate) return;
+
+    enemyTimer = 0;
+
+    if (enemies.length >= cfg.max) return;
+
+    let e;
+
+    if (spawnConfig.level === "Easy") {
+
+        e = createNormalEnemy();
+
+    } else if (spawnConfig.level === "Normal") {
+
+        const roll = Math.random();
+        e = roll < 0.75
+            ? createNormalEnemy()
+            : createFastEnemy();
+
+    } else if (spawnConfig.level === "Hard") {
+
+        const roll = Math.random();
+
+        if (roll < 0.6) {
+            e = createNormalEnemy();
+        } else if (roll < 0.85) {
+            e = createFastEnemy();
+        } else {
+            e = createHeavyEnemy();
+        }
+
+    }
+
+    const pos = getRandomSpawnPoint();
+    e.x = pos.x;
+    e.y = pos.y;
+
+    enemies.push(e);
+}
+
+function gameLoop(time) {
+    if (isGamePaused) {
+        lastTime = time; 
+        requestAnimationFrame(gameLoop);
+        return
+    }
+    const deltaTime = time - lastTime;
+    lastTime = time;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (isGameRunning) {
+        updatePlayer(deltaTime);
+    }
+    if (isGameRunning) {
+        renderWall(ctx);
+        for (const enemy of enemies) {
+            renderEnemy(ctx, enemy);
+        }
+        spawnEnemy(deltaTime);
+        for (let i = enemies.length - 1; i >= 0; i--) {
+            const enemy = enemies[i];
+            updateEnemy(enemy, deltaTime, wall.y);
+            if (enemy.isDead) {
+                enemies.splice(i, 1);
+            }
+            renderEnemy(ctx, enemy);
+            checkAdrenalineRush();
+        }
+        if (wall.hp <= 0) {
+            showGameOver();
+            return;
+        }
+        renderStats(ctx);
+        renderPlayer(ctx);
+        renderBullets(ctx);
+        renderExplosions(ctx);
+        renderDamageTexts(ctx);
+    }
+
+    requestAnimationFrame(gameLoop);
+}
+
+function getRandomSpawnPoint() {
+    const { w, h } = getCanvasSize();
+    const margin = 20;
+
+    return {
+        x: margin + Math.random() * (w - margin * 2),
+        y: -margin
+    };
+}
+
+export function scaleSpawnByLevel() {
+  const lvl = getPlayerLevel();
+  const cfg = spawnConfig.configs[spawnConfig.level];
+
+  let baseRate, baseMax;
+
+  if (spawnConfig.level === "Easy") {
+    baseRate = 3000;
+    baseMax = 4;
+
+    const rateSteps = Math.floor(lvl / 5);
+    const maxSteps  = Math.floor(lvl / 7);
+
+    cfg.rate = Math.max(100, baseRate - rateSteps * 100);
+    cfg.max  = baseMax + maxSteps;
+  }
+
+  if (spawnConfig.level === "Normal") {
+    baseRate = 1500;
+    baseMax = 4;
+
+    const rateSteps = Math.floor(lvl / 7);
+    const maxSteps  = Math.floor(lvl / 10);
+
+    cfg.rate = Math.max(100, baseRate - rateSteps * 100);
+    cfg.max  = baseMax + maxSteps;
+  }
+
+  if (spawnConfig.level === "Hard") {
+    baseRate = 1000;
+    baseMax = 4;
+
+    const rateSteps = Math.floor(lvl / 12);
+    const maxSteps  = Math.floor(lvl / 15);
+
+    cfg.rate = Math.max(100, baseRate - rateSteps * 100);
+    cfg.max  = baseMax + maxSteps;
+  }
+
+  enemyRespawnTime = cfg.rate;
+
+  console.log(
+    `[SCALING] ${spawnConfig.level} | Level ${lvl} | rate=${cfg.rate} | max=${cfg.max}`
+  );
+}
+
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+import {
+    updatePlayer,
+    renderPlayer,
+    renderBullets,
+    renderStats,
+    renderExplosions,
+    renderDamageTexts,
+    getPlayerLevel
+} from './player.js';
+
+import { isGameRunning, showGameOver } from './ui.js';
+
+import {
+    enemies,
+    createNormalEnemy,
+    createFastEnemy,
+    createHeavyEnemy,
+    renderEnemy,
+    updateEnemy,
+    setWall,
+    checkAdrenalineRush
+} from "./enemy.js";
+
+setWall(wall);
+
+export {
+    renderWall,
+    resetGameTimers,
+    enemyExpMultiplier,
+    enemyHpMultiplier
+};
+
+export function resetLastTime() {
+    lastTime = performance.now();
+}
+
+export function getLastTime() {
+    return lastTime;
+}
+
+function getCanvasSize() {
+    return {
+        w: canvas.clientWidth || canvas.width,
+        h: canvas.clientHeight || canvas.height
+    };
+}
+
+requestAnimationFrame(gameLoop);
+
+//=====end of canvas.js=====
+
+//=====card.js=====
+
+const rarities = {
+
+    common: 0,
+    rare: 0,
+    epic: 35,
+    legendary: 35,
+    mythic: 0,
+    secret: 30
+};
+
+const cardPool = {
+    common: [
+        { id: "atk_up_1", label: "+2 DMG", target: "player", type: "stack" }
+    ],
+    rare: [
+        { id: "atk_up_2", label: "+4 DMG", target: "player", type: "stack" },
+        { id: "enemy_hp_up", label: "Enemy HP +50%, EXP +40%", target: "enemy", type: "stack" },
+        { id: "burn_shot", label: "Burn Shot +10%", target: "player", type: "stack" }
+    ],
+    epic: [
+        { id: "atk_up_3", label: "+7 DMG", target: "player", type: "stack" },
+        { id: "double_shot", label: "Double Shot", target: "player", type: "once"}
+    ],
+    legendary: [
+        { id: "atk_up_legend", label: "+12 DMG", target: "player", type: "stack" },
+    ],
+    mythic: [
+        { id: "adrenaline_rush", label: "Adrenaline Rush", target: "player", type: "once"},
+        { id: "slow_down", label: "Speed slow -20", target: "enemy", type: "once" }
+    ],
+    secret: [
+        // { id: "explosive_round", label: "Explosive Rounds", target: "player", type: "once" },
+        { id: "AI_Accuration", label: "Accuration buffed, bigger bullet", target: "player", type: "once" }
+    ]
+
+};
+
+function rollRarity() {
+    const roll = Math.random() * 100;
+    let acc = 0;
+
+    for (const r in rarities) {
+        acc += rarities[r];
+        if (roll <= acc) return r;
+    }
+}
+
+function rollCard(rarity) {
+  let pool = cardPool[rarity];
+
+  if (ownedOnceCardsRef) {
+    pool = pool.filter(card => {
+      if (card.type !== "once") return true;
+      return !ownedOnceCardsRef.has(card.id);
+    });
+  }
+
+  if (pool.length === 0) return null;
+
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+let ownedOnceCardsRef = null;
+
+export function setOwnedOnceCards(ref) {
+  ownedOnceCardsRef = ref;
+}
+
+export function rollThreeCards() {
+    const cards = [];
+
+    while (cards.length < 3) {
+        const rarity = rollRarity();
+        const card = rollCard(rarity);
+
+        if (!card) continue;
+
+        cards.push({
+            ...card,
+            rarity
+        });
+    }
+
+    return cards;
+}
+
+
+//=====end of card.js=====
+
+//=====enemy.js=====
+
+import { player, addDamageText, playerEffects } from "./player.js";
+
+const enemies = [];
+
+const ADRENALINE_LINE_Y = 390;
+
+let enemyHpMultiplier = 1;
+let enemyExpMultiplier = 1;
+let enemySpeedMultiplier = 1;
+
+function increaseEnemyHpMultiplier(val) {
+    enemyHpMultiplier += val;
+}
+
+function increaseEnemyExpMultiplier(val) {
+    enemyExpMultiplier += val;
+}
+
+function multiplyEnemySpeedMultiplier(val) {
+    enemySpeedMultiplier *= val;
+}
+
+let enemyTimer = 0;
+
+let wallRef = null;
+
+function setWall(wall) {
+    wallRef = wall;
+}
+
+function createNormalEnemy() {
+    return {
+        type: "normal",
+        radius: 16,
+        hp: 80 * (0.75 + player.damage * 0.02) * enemyHpMultiplier,
+        speed: 50 * enemySpeedMultiplier,          
+        attack: 10,
+        attackSpeed: 1.0,
+        attackCooldown: 0,
+        exp: 20 * enemyExpMultiplier,
+
+        isBurning: false,
+        burnTime: 0,
+        burnDamage: 0
+    };
+}
+
+function createFastEnemy() {
+    return {
+        type: "fast",
+        radius: 16,
+        hp: 40 * (0.75 + player.damage * 0.02) * enemyHpMultiplier,
+        speed: 100 * enemySpeedMultiplier,          
+        attack: 0.8,
+        attackSpeed: 0.5,
+        attackCooldown: 0,
+        exp: 35 * enemyExpMultiplier,
+
+        isBurning: false,
+        burnTime: 0,
+        burnDamage: 0
+    }
+}
+
+function createHeavyEnemy() {
+    return {
+        type: "heavy",
+        radius: 16,
+        hp: 200 * (0.75 + player.damage * 0.05) * enemyHpMultiplier,
+        speed: 20 * enemySpeedMultiplier,          
+        attack: 25,
+        attackSpeed: 2.0,
+        attackCooldown: 0,
+        exp: 50 * enemyExpMultiplier,
+
+        isBurning: false,
+        burnTime: 0,
+        burnDamage: 0
+    }
+}
+
+function updateEnemy(enemy, deltaTime, wallY) {
+    if (enemy.isDying) {
+        enemy.deathTimer -= deltaTime;
+        if (enemy.deathTimer <= 0) {
+            enemy.isDead = true;
+        }
+        return;
+    }
+    if (enemy.isBurning) {
+        enemy.burnTime -= deltaTime;
+        const burnDmg = enemy.burnDamage * (deltaTime / 1000);
+        enemy.hp -= burnDmg;
+        if (!enemy.burnTickTimer) enemy.burnTickTimer = 0;
+        enemy.burnTickTimer += deltaTime;
+        if (enemy.burnTickTimer >= 200) {
+            enemy.burnTickTimer = 0;
+            addDamageText(
+                enemy.x,
+                enemy.y - enemy.radius - 10,
+                burnDmg.toFixed(1),
+                "burn"
+            );
+        }
+
+        if (enemy.burnTime <= 0) {
+            enemy.isBurning = false;
+            enemy.burnTickTimer = 0;
+        }
+    }
+
+    if (!enemy.isOnWall) {
+        enemy.y += enemy.speed * (deltaTime / 1000);
+    }
+
+    const bottom = enemy.y + enemy.radius;
+
+    if (bottom >= wallY) {
+        enemy.y = wallY - enemy.radius;
+        enemy.isOnWall = true;
+
+        enemy.attackCooldown -= deltaTime;
+
+        if (enemy.attackCooldown <= 0 && wallRef) {
+            wallRef.hp -= enemy.attack;
+
+            enemy.attackCooldown = enemy.attackSpeed * 1000;
+        }
+    } else {
+        enemy.isOnWall = false;
+    }
+}
+
+function renderEnemy(ctx, enemy) {
+    let bodyColor, outlineColor, coreColor;
+
+    let alpha = 1;
+    let trembleX = 0;
+    let trembleY = 0;
+
+    if (enemy.isDying) {
+        alpha = enemy.deathTimer / 300;
+
+        const shake = 2; 
+        trembleX = (Math.random() - 0.5) * shake;
+        trembleY = (Math.random() - 0.5) * shake;
+    }
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(trembleX, trembleY);
+
+    if (enemy.type === "heavy") {
+
+        bodyColor = "#ff4b4b";
+        outlineColor = "#7a0000";
+        coreColor = "#ffd2d2";
+    }
+    else if (enemy.type === "normal") {
+
+        bodyColor = "#ffd93b";
+        outlineColor = "#a67c00";
+        coreColor = "#fff2b2";
+    }
+    else if (enemy.type === "fast") {
+
+        bodyColor = "#4bff6a";
+        outlineColor = "#007a2a";
+        coreColor = "#baffc7";
+    }
+
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.lineWidth = 3.7;
+    ctx.strokeStyle = outlineColor;
+    ctx.stroke();
+
+    ctx.fillStyle = coreColor;
+    ctx.beginPath();
+    ctx.arc(enemy.x - 4, enemy.y - 4, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore(); 
+}
+
+function checkAdrenalineRush() {
+    if (!playerEffects.adrenalineRush) return;
+
+    const danger = enemies.some(e => e.y >= ADRENALINE_LINE_Y);
+
+    if (danger && !playerEffects.adrenalineActive) {
+        playerEffects.adrenalineActive = true;
+
+        player.shootRate *= 0.7;  
+        player.damage *= 1.1;     
+
+    }
+
+    if (!danger && playerEffects.adrenalineActive) {
+        playerEffects.adrenalineActive = false;
+
+        player.shootRate /= 0.7;
+        player.damage /= 1.1;
+
+    }
+}
+
+export function resetEnemyTimer() {
+    enemyTimer = 0;
+}
+
+export {
+    enemies,
+    createNormalEnemy,
+    createFastEnemy,
+    createHeavyEnemy,
+    renderEnemy,
+    updateEnemy,
+    setWall,
+
+    enemySpeedMultiplier,
+    enemyExpMultiplier,
+    enemyHpMultiplier,
+
+    increaseEnemyHpMultiplier,
+    increaseEnemyExpMultiplier,
+    multiplyEnemySpeedMultiplier,
+
+    checkAdrenalineRush,
+};
+
+//=====end of enemy.js=====
+
+//=====player.js=====
+
+const stats = {
+    level: 1,
+    exp: 0,
+    expToNext: 100
+};
+
+const player = {
+    x: 180,
+    y: 600,
+    width: 32,
+    height: 32,
+    radius: 16,
+    angle: -Math.PI / 2,
+    shootCooldown: 0,
+    shootRate: 620,
+    damage: 20
+};
+
+const playerEffects = {
+    explosive: false,
+    doubleShot: false,
+    burnChance: 0,
+    get burnDamage() {
+        return (20 + player.damage) * 1.4;
+    },
+    burnDuration: 1200,
+    explosiveRadius: 60,
+    get explosiveDamage() {
+        return 20 + (player.damage / 2);
+    },
+    adrenalineRush: false,
+    adrenalineActive: false,
+    secretAim: false,
+}
+
+const bullets = [];
+const explosions = [];
+const damageTexts = [];
+
+import { enemies } from "./enemy.js";
+import { scaleSpawnByLevel } from "./canvas.js";
+
+//=====AI=====
+
+function updatePlayer(deltaTime) {
+    player.shootCooldown -= deltaTime;
+    const target = findNearestEnemy();
+
+    if (target) {
+        const px = player.x + player.width / 2;
+        const py = player.y + player.height / 2;
+        const aim = getVerticalLeadAim(
+            px,
+            py,
+            target,
+            300
+        );
+        const dx = aim.x - px;
+        const dy = aim.y - py;
+
+        player.angle = Math.atan2(dy, dx);
+        if (player.shootCooldown <= 0) {
+            shootAtAngle(player.angle);
+            player.shootCooldown = player.shootRate;
+        }
+    }
+
+    function updateExplosions(deltaTime) {
+        for (let i = explosions.length - 1; i >= 0; i--) {
+            const ex = explosions[i];
+            ex.life -= deltaTime;
+            ex.visualRadius += (ex.maxVisualRadius / 600) * deltaTime;
+            if (!ex.hasDealtDamage) {
+                applyExplosionDamage(ex);
+                ex.hasDealtDamage = true;
+            }
+            if (ex.life <= 0) {
+                explosions.splice(i, 1);
+            }
+        }
+    }
+
+    updateBullets(deltaTime);
+    updateExplosions(deltaTime);
+
+    for (let i = damageTexts.length - 1; i >= 0; i--) {
+        const t = damageTexts[i];
+        t.y += t.vy * deltaTime;
+        t.life -= deltaTime;
+        if (t.life <= 0) {
+            damageTexts.splice(i, 1);
+        }
+    }
+}
+
+function findNearestEnemy() {
+    if (enemies.length === 0) return null;
+
+    let nearest = null;
+    let minDist = Infinity;
+
+    for (const enemy of enemies) {
+        if (enemy.isDying || enemy.isDead) continue;
+        const dx = enemy.x - player.x;
+        const dy = enemy.y - player.y;
+
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < minDist) {
+            minDist = dist;
+            nearest = enemy;
+        }
+    }
+
+    return nearest;
+}
+
+function getVerticalLeadAim(px, py, enemy, bulletSpeed) {
+    const ex = enemy.x;
+    const ey = enemy.y;
+    const dx = ex - px;
+    const dy = ey - py;
+    const enemyVy = enemy.isOnWall ? 0 : enemy.speed;
+
+    let aimOffset;
+    let time;
+
+    if (playerEffects.secretAim) {
+        time = Math.sqrt(dx * dx + dy * dy) / bulletSpeed;
+        for (let i = 0; i < 3; i++) {
+            const predictedY = ey + enemyVy * time;
+            const predictedDist = Math.sqrt(dx * dx + (predictedY - py) * (predictedY - py));
+            time = predictedDist / bulletSpeed;
+        }
+        aimOffset = 0;
+        return {
+            x: ex,
+            y: ey + enemyVy * time + aimOffset
+        };
+    } else {
+        time = Math.abs(dx) / (bulletSpeed - enemyVy);
+        aimOffset = -enemy.radius * 0.6;
+    }
+    return {
+        x: ex,
+        y: ey + enemyVy * time + aimOffset
+    };
+}
+
+//=====end of AI=====
+
+function addDamageText(x, y, value, type = "normal") {
+    damageTexts.push({
+        x,
+        y,
+        value,
+        life: 600,
+        vy: -0.03,
+        type
+    });
+}
+
+function renderPlayer(ctx) {
+    const cx = player.x + player.width / 2;
+    const cy = player.y + player.height / 2;
+    const radius = player.width / 1.44;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(player.angle);
+
+    ctx.fillStyle = '#27a8ff';
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#8a8a8a';
+    ctx.stroke();
+
+    ctx.fillStyle = '#8a8a8a';
+    const gunLength = 29;
+    const gunWidth = 30;
+
+    ctx.fillRect(radius - 2, -gunWidth / 2, gunLength, gunWidth);
+
+    ctx.restore();
+}
+
+function renderExplosions(ctx) {
+    for (const ex of explosions) {
+        ctx.save();
+
+        ctx.globalAlpha = ex.life / 300;
+
+        ctx.strokeStyle = "#ff9f1c";
+        ctx.lineWidth = 4;
+
+        ctx.beginPath();
+        ctx.arc(ex.x, ex.y, ex.visualRadius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+}
+
+function renderDamageTexts(ctx) {
+    ctx.font = "14px Arial";
+    ctx.textAlign = "center";
+
+    for (const t of damageTexts) {
+        ctx.globalAlpha = t.life / 500;
+
+        if (t.type === "burn") {
+            ctx.fillStyle = "orange";
+        } else {
+            ctx.fillStyle = "#ffffff";
+        }
+
+        ctx.fillText(t.value, t.x, t.y);
+    }
+
+    ctx.globalAlpha = 1;
+}
+
+function shootAtAngle(angle) {
+    const cx = player.x + player.width / 2;
+    const cy = player.y + player.height / 2;
+
+    const radius = player.width / 1.44;
+    const gunLength = 29;
+    const barrelOffset = radius - 2 + gunLength;
+
+    const startX = cx + Math.cos(angle) * barrelOffset;
+    const startY = cy + Math.sin(angle) * barrelOffset;
+
+    const bulletRadius = playerEffects.secretAim ? 7 : 5;
+
+    const shootOne = () => {
+        const dmgMultiplier = playerEffects.doubleShot ? 0.55 : 1;
+        bullets.push({
+            x: startX,
+            y: startY,
+            vx: Math.cos(angle) * 300,
+            vy: Math.sin(angle) * 300,
+            radius: bulletRadius,
+            explosive: playerEffects.explosive,
+            damage: player.damage * dmgMultiplier
+        });
+    };
+
+    if (!playerEffects.doubleShot) {
+
+        shootOne();
+    } else {
+
+        shootOne();
+        setTimeout(() => {
+            shootOne();
+        }, 150);
+    }
+}
+
+function createExplosion(x, y) {
+    explosions.push({
+        x,
+        y,
+
+        visualRadius: 5,
+        damageRadius: playerEffects.explosiveRadius,
+
+        maxVisualRadius: playerEffects.explosiveRadius,
+        damage: playerEffects.explosiveDamage,
+        life: 400,
+        hasDealtDamage: false
+    });
+}
+
+function updateBullets(deltaTime) {
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        const b = bullets[i];
+
+        b.x += b.vx * (deltaTime / 1000);
+        b.y += b.vy * (deltaTime / 1000);
+
+        for (let j = enemies.length - 1; j >= 0; j--) {
+            const e = enemies[j];
+            if (e.isDying || e.isDead) continue;
+            const dx = b.x - e.x;
+            const dy = b.y - e.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < b.radius + e.radius) {
+                const dmg = b.damage ?? player.damage;
+                e.hp -= dmg;
+
+                if (Math.random() < playerEffects.burnChance) {
+                    e.isBurning = true;
+                    e.burnTime = playerEffects.burnDuration;
+                    e.burnDamage = playerEffects.burnDamage;
+                }
+
+                if (b.explosive) {
+                    createExplosion(e.x, e.y);
+                }
+                bullets.splice(i, 1);
+
+                if (e.hp <= 0) {
+                    const gainedExp = Math.round(e.exp + (1 + stats.level * 0.04));
+                    stats.exp += gainedExp;
+
+                    if (stats.exp >= stats.expToNext) {
+                        levelUp();
+                    }
+                    e.isDying = true;
+                    e.deathTimer = 300;
+                }
+
+                addDamageText(e.x, e.y, Math.floor(dmg), "normal");
+
+                break;
+            }
+        }
+    }
+}
+
+function renderBullets(ctx) {
+    for (const b of bullets) {
+        ctx.fillStyle = "#ffffffff";
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function applyExplosionDamage(explosion) {
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        const e = enemies[i];
+
+        const dx = e.x - explosion.x;
+        const dy = e.y - explosion.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist <= explosion.damageRadius) {
+            e.hp -= explosion.damage;
+
+            if (e.hp <= 0) {
+                e.isDying = true;
+                e.deathTimer = 300;
+            }
+        }
+    }
+}
+
+function renderStats(ctx) {
+    ctx.fillStyle = "#ffc107";
+    ctx.font = "16px Arial";
+    ctx.fillText(
+        `EXP: ${stats.exp} / ${stats.expToNext}`, 51, 675
+    );
+
+    ctx.fillStyle = "orange";
+    ctx.font = "16px Arial";
+    ctx.fillText(
+        `BURN: ${(playerEffects.burnChance * 100).toFixed(0)}%`,
+        44, 655
+    );
+
+    if (playerEffects.adrenalineRush) {
+        ctx.fillStyle = playerEffects.adrenalineActive ? "#ff0044" : "#888";
+        ctx.fillText(
+            `ADRENALINE: ${playerEffects.adrenalineActive ? "ON" : "READY"}`,
+            200,
+            655
+        );
+    }
+}
+
+function levelUp() {
+    stats.level++;
+    stats.exp = 0;
+    stats.expToNext = Math.floor(stats.expToNext * 1.3);
+
+    scaleSpawnByLevel();
+
+    window.dispatchEvent(new CustomEvent("player-level-up", {
+        detail: { level: stats.level }
+    }));
+}
+
+export function getPlayerLevel() {
+    return stats.level;
+}
+
+export {
+    player,
+    updatePlayer,
+    renderPlayer,
+    renderBullets,
+    renderStats,
+    playerEffects,
+    renderExplosions,
+    renderDamageTexts,
+    addDamageText
+};
+
+//=====end of player.js=====

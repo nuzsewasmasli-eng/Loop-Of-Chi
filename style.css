@@ -1,0 +1,180 @@
+::-webkit-scrollbar {display: none;}
+
+body {
+    color: white;
+    background-color: rgb(0, 0, 0);
+}
+
+.popup {
+    display: none;
+}
+
+.popup.active {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,5,10,0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.menu-card {
+  width: min(90vw, 450px);
+  background: linear-gradient(180deg, #151525, #0b0b15);
+  border-radius: 15px;
+  padding: 25px;
+  animation: bordershadow 1.5s ease infinite;
+}
+
+.game-title {
+  text-align: center;
+  margin-bottom: 18px;
+  letter-spacing: 1px;
+}
+
+.section {
+  margin: 8px;
+}
+
+.section h3 {
+  font-size: 21px;
+  margin-bottom: 2px;
+  color: #9ddcff;
+}
+
+.section p {
+  font-size: 17px;
+  opacity: 0.85;
+}
+
+select, button {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+}
+
+#startBtn,
+#restartBtn {
+  background: #2ecc71;
+  color: black;
+  font-weight: bold;
+}
+
+#startBtn:disabled,
+#restartBtn:disabled {
+  background: #555;
+  color: #999;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+#startBtn:not(:disabled):hover,
+#restartBtn:not(:disabled):hover {
+  animation: doki 0.8s ease infinite;
+}
+
+#gameCanvas {
+  background: black;
+  border-radius: 10px;
+  animation: BS 4s ease infinite;
+}
+
+#game-container {
+  position: relative;      
+  width: 400px;
+  height: 680px;
+  margin: auto;
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#cardOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+}
+
+.card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.card {
+  all: unset;              
+  box-sizing: border-box;
+  width: 260px;
+  height: 120px;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: white;
+  background: #1e1e1e;
+  border: 3px solid;
+  box-shadow: 0 0 12px #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card.common{
+  border-color: #777;
+  box-shadow: 0 0 12px #555;
+}
+
+.card.rare{
+  border-color: #3da5ff;
+  box-shadow: 0 0 14px #3da5ff;
+}
+
+.card.epic{
+  border-color: #b36bff;
+  box-shadow: 0 0 16px #b36bff;
+}
+
+.card.legendary{
+  border-color: #ffcc33;
+  box-shadow: 0 0 18px #ffcc33;
+}
+
+.card.mythic{
+  border-color: #ff4d4d;
+  box-shadow: 0 0 20px #ff4d4d;
+}
+
+.card.secret{
+  border-color: #2fffd5;
+  box-shadow: 0 0 22px #2fffd5;
+}
+
+@keyframes bordershadow {
+  0% {box-shadow: 0 0px 60px greenyellow; border: 3px solid greenyellow;}
+  25% {box-shadow: 0 0px 60px rgb(255, 255, 255); border: 3px solid rgb(255, 255, 255);}
+  50% {box-shadow: 0 0px 60px greenyellow; border: 3px solid greenyellow;} 
+  75% {box-shadow: 0 0px 60px rgb(255, 255, 255); border: 3px solid rgb(255, 255, 255);}
+  100% {box-shadow: 0 0px 60px greenyellow; border: 3px solid greenyellow;}
+}
+
+@keyframes doki {
+  50% {background: #38ff87; transform: translateY(-0.4px) scale(1.02); box-shadow: 0 0 25px white;}
+}
+
+@keyframes BS {
+  0% {box-shadow: 0 0px 60px rgb(255, 0, 0); border: 3px solid rgb(255, 0, 0);}
+  17% {box-shadow: 0 0px 60px greenyellow; border: 3px solid greenyellow;}
+  34% {box-shadow: 0 0px 60px cyan; border: 3px solid cyan;}
+  51% {box-shadow: 0 0px 60px red; border: 3px solid red;}
+  68% {box-shadow: 0 0px 60px greenyellow; border: 3px solid greenyellow;}
+  85% {box-shadow: 0 0px 60px cyan; border: 3px solid cyan;}
+  100% {box-shadow: 0 0px 60px red; border: 3px solid red;}
+}

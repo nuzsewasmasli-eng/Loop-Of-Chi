@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loop of Chi</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <!-- START GAME POPUP -->
+    <div id="startScreen" class="popup active">
+        <div class="menu-card">
+            <h1 class="game-title">LOOP OF CHI</h1>
+            <div class="section">
+                <h3>Cara Main</h3>
+                <p>Tank menembak otomatis ke musuh terdekat. Kalahkan musuh, dapatkan EXP, naik level dan pilih
+                    kartu untuk memperkuat diri. semakin tinggi level player, semakin banyak dan besar HP musuh.<br>
+                <strong>bisa saja tembakannya tidak akurat</strong></p>
+            </div>
+            <div class="section">
+                <h3>Kartu & Upgrade</h3>
+                <p>Setiap naik level, kamu memilih 1 dari 3 kartu acak. Kartu bisa bertumpuk, yang membuat player makin kuat seiring berjalannya permainan.</p>
+            </div>
+            <div class="section">
+                <h3>Jenis Musuh</h3>
+                <p>🔴 Merah:lambat, HP tinggi, Attack besar-lambat<br>
+                    🟡 Kuning:normal, HP normal, Attack normal-normal<br>
+                    🟢 Hijau:cepat, HP rendah, Attack kecil-cepat</p>
+            </div>
+            <div class="section">
+                <h3>Pilih Level Awal</h3>
+                <select id="startLevel">
+                    <option value="">-- Pilih Level --</option>
+                    <option value="Easy">Easy</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Hard">Hard</option>  
+                </select>
+                <button id="startBtn" disabled>Mulai Game</button>
+            </div>
+        </div>
+    </div>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="400" height="680" style="display:none;"></canvas>
+    </div>
+    <!-- GAME OVER POPUP -->
+    <div id="gameOverScreen" class="popup">
+        <div class="menu-card">
+            <h1 class="game-title">GAME OVER</h1>
+            <div class="section">
+                <p>Tembok hancur. Pertahanan gagal.</p>
+            </div>
+            <button id="restartBtn">Restart</button>
+        </div>
+    </div>
+    <script type="module" src="./canvas.js"></script>
+</body>
+</html>
