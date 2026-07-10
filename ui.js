@@ -88,6 +88,7 @@ function showCardSelection(cards) {
   `;
 
   document.body.appendChild(overlay);
+  overlay.classList.add("fadeIn");  
   overlay.addEventListener("click", (e) => {
     if (!e.target.classList.contains("card")) return;
     const idx = e.target.dataset.index;

@@ -385,26 +385,22 @@ function applyExplosionDamage(explosion) {
 }
 
 function renderStats(ctx) {
-    ctx.fillStyle = "#ffc107";
-    ctx.font = "16px Arial";
-    ctx.fillText(
-        `EXP: ${stats.exp} / ${stats.expToNext}`, 51, 675
-    );
-
-    ctx.fillStyle = "orange";
-    ctx.font = "16px Arial";
-    ctx.fillText(
-        `BURN: ${(playerEffects.burnChance * 100).toFixed(0)}%`,
-        44, 655
-    );
-
-    if (playerEffects.adrenalineRush) {
-        ctx.fillStyle = playerEffects.adrenalineActive ? "#ff0044" : "#888";
-        ctx.fillText(
-            `ADRENALINE: ${playerEffects.adrenalineActive ? "ON" : "READY"}`,
-            200,
-            655
-        );
+    document.getElementById('expValue').textContent = `${stats.exp} / ${stats.expToNext}`;
+    document.getElementById('burnValue').textContent = `${(playerEffects.burnChance * 100).toFixed(0)}%`;
+    document.getElementById('poisonValue').textContent = `${(playerEffects.poisonChance * 100).toFixed(0)}%`;
+    
+    const adrenalineContainer = document.getElementById('adrenalineContainer');
+    const adrenalineValue = document.getElementById('adrenalineValue');
+    
+    if (!playerEffects.adrenalineRush) {
+        adrenalineValue.textContent = 'NOPE';
+        adrenalineContainer.classList.remove('active');
+    } else if (playerEffects.adrenalineActive) {
+        adrenalineValue.textContent = 'ON';
+        adrenalineContainer.classList.add('active');
+    } else {
+        adrenalineValue.textContent = 'READY';
+        adrenalineContainer.classList.remove('active');
     }
 }
 

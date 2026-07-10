@@ -161,6 +161,7 @@ function updateEnemy(enemy, deltaTime, wallY) {
 
 function renderEnemy(ctx, enemy) {
     let bodyColor, outlineColor, coreColor;
+    let glowColor = "#ffffff";  // Default white glow
 
     let alpha = 1;
     let trembleX = 0;
@@ -168,30 +169,46 @@ function renderEnemy(ctx, enemy) {
 
     if (enemy.isDying) {
         alpha = enemy.deathTimer / 300;
-
         const shake = 2; 
         trembleX = (Math.random() - 0.5) * shake;
         trembleY = (Math.random() - 0.5) * shake;
+    }
+
+    // Determine glow color based on status
+    if (enemy.isBurning && enemy.isPoisoned) {
+        // Alternate warna setiap frame
+        glowColor = Math.floor(Date.now() / 300) % 2 === 0 ? "#ff8800" : "#00ff00";
+    } else if (enemy.isBurning) {
+        glowColor = "#ff8800";  // Orange
+    } else if (enemy.isPoisoned) {
+        glowColor = "#00ff00";  // Green
     }
 
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.translate(trembleX, trembleY);
 
-    if (enemy.type === "heavy") {
+    // Render glow
+    ctx.fillStyle = glowColor;
+    ctx.globalAlpha = alpha * 0.3;  // Glow transparency
+    ctx.beginPath();
+    ctx.arc(enemy.x, enemy.y, enemy.radius + 8, 0, Math.PI * 2);
+    ctx.fill();
 
+    // Render body dengan full opacity
+    ctx.globalAlpha = alpha;
+
+    if (enemy.type === "heavy") {
         bodyColor = "#ff4b4b";
         outlineColor = "#7a0000";
         coreColor = "#ffd2d2";
     }
     else if (enemy.type === "normal") {
-
         bodyColor = "#ffd93b";
         outlineColor = "#a67c00";
         coreColor = "#fff2b2";
     }
     else if (enemy.type === "fast") {
-
         bodyColor = "#4bff6a";
         outlineColor = "#007a2a";
         coreColor = "#baffc7";
@@ -210,6 +227,7 @@ function renderEnemy(ctx, enemy) {
     ctx.beginPath();
     ctx.arc(enemy.x - 4, enemy.y - 4, 4, 0, Math.PI * 2);
     ctx.fill();
+    
     ctx.restore(); 
 }
 

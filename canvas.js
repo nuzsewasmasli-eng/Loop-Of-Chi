@@ -1,5 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const hudToogle = document.getElementById('hudToggle');
+const gameHUD = document.getElementById('gameHUD');
 
 let lastTime = 0;
 let isGamePaused = false;
@@ -119,15 +121,37 @@ export function spawnEnemy(delta) {
     enemies.push(e);
 }
 
+function renderBackgroundPattern(ctx) {
+    const gridSize = 40;
+    const dotRadius = 2;
+    
+    ctx.fillStyle = "rgba(255, 165, 0, 0.5)";  // Subtle orange
+    
+    for (let x = 0; x < canvas.width; x += gridSize) {
+        for (let y = 0; y < canvas.height; y += gridSize) {
+            ctx.beginPath();
+            ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+}
+
 function gameLoop(time) {
+    const gameHUD = document.getElementById('gameHUD');
+    if (isGameRunning && !gameHUD.classList.contains('active')) {
+        gameHUD.classList.add('active');
+    } else if (!isGameRunning && gameHUD.classList.contains('active')) {
+        gameHUD.classList.remove('active');
+    }
     if (isGamePaused) {
-        lastTime = time; 
+        lastTime = time;
         requestAnimationFrame(gameLoop);
         return
     }
     const deltaTime = time - lastTime;
     lastTime = time;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    renderBackgroundPattern(ctx);
     if (isGameRunning) {
         updatePlayer(deltaTime);
     }
@@ -171,50 +195,54 @@ function getRandomSpawnPoint() {
 }
 
 export function scaleSpawnByLevel() {
-  const lvl = getPlayerLevel();
-  const cfg = spawnConfig.configs[spawnConfig.level];
+    const lvl = getPlayerLevel();
+    const cfg = spawnConfig.configs[spawnConfig.level];
 
-  let baseRate, baseMax;
+    let baseRate, baseMax;
 
-  if (spawnConfig.level === "Easy") {
-    baseRate = 3000;
-    baseMax = 4;
+    if (spawnConfig.level === "Easy") {
+        baseRate = 3000;
+        baseMax = 4;
 
-    const rateSteps = Math.floor(lvl / 5);
-    const maxSteps  = Math.floor(lvl / 7);
+        const rateSteps = Math.floor(lvl / 5);
+        const maxSteps = Math.floor(lvl / 7);
 
-    cfg.rate = Math.max(100, baseRate - rateSteps * 100);
-    cfg.max  = baseMax + maxSteps;
-  }
+        cfg.rate = Math.max(100, baseRate - rateSteps * 100);
+        cfg.max = baseMax + maxSteps;
+    }
 
-  if (spawnConfig.level === "Normal") {
-    baseRate = 1500;
-    baseMax = 4;
+    if (spawnConfig.level === "Normal") {
+        baseRate = 1500;
+        baseMax = 4;
 
-    const rateSteps = Math.floor(lvl / 7);
-    const maxSteps  = Math.floor(lvl / 10);
+        const rateSteps = Math.floor(lvl / 7);
+        const maxSteps = Math.floor(lvl / 10);
 
-    cfg.rate = Math.max(100, baseRate - rateSteps * 100);
-    cfg.max  = baseMax + maxSteps;
-  }
+        cfg.rate = Math.max(100, baseRate - rateSteps * 100);
+        cfg.max = baseMax + maxSteps;
+    }
 
-  if (spawnConfig.level === "Hard") {
-    baseRate = 1000;
-    baseMax = 4;
+    if (spawnConfig.level === "Hard") {
+        baseRate = 1000;
+        baseMax = 4;
 
-    const rateSteps = Math.floor(lvl / 12);
-    const maxSteps  = Math.floor(lvl / 15);
+        const rateSteps = Math.floor(lvl / 12);
+        const maxSteps = Math.floor(lvl / 15);
 
-    cfg.rate = Math.max(100, baseRate - rateSteps * 100);
-    cfg.max  = baseMax + maxSteps;
-  }
+        cfg.rate = Math.max(100, baseRate - rateSteps * 100);
+        cfg.max = baseMax + maxSteps;
+    }
 
-  enemyRespawnTime = cfg.rate;
+    enemyRespawnTime = cfg.rate;
 
-  console.log(
-    `[SCALING] ${spawnConfig.level} | Level ${lvl} | rate=${cfg.rate} | max=${cfg.max}`
-  );
+    console.log(
+        `[SCALING] ${spawnConfig.level} | Level ${lvl} | rate=${cfg.rate} | max=${cfg.max}`
+    );
 }
+
+hudToggle.addEventListener('click', () => {
+  gameHUD.classList.toggle('expanded');
+});
 
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
