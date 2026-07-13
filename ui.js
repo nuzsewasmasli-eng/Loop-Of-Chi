@@ -70,6 +70,7 @@ function applyCardEffect(card) {
     case "AI_Accuration": playerEffects.secretAim = true; break;
     case "poison_shot": playerEffects.poisonChance = Math.min(playerEffects.poisonChance + 0.08, 0.4); break;
     case "fire_rate_up": playerEffects.fireRateBonus = Math.min(playerEffects.fireRateBonus + 0.05, 0.2); break;
+    case "hi";
   }
 }
 
