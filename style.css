@@ -25,6 +25,8 @@ body {
   border-radius: 15px;
   padding: 25px;
   animation: bordershadow 1.5s ease infinite;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .game-title {
@@ -94,12 +96,19 @@ select, button {
   height: auto;
   aspect-ratio: 400 / 680;
   margin: auto;
-  margin-top: 40px;
+  margin-top: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+@media (max-width: 480px) {
+  #game-container {
+    width: 100vw;
+    margin: 0;
+    margin-top: 10px;
+  }
+}
 
 #cardOverlay {
   position: absolute;
@@ -292,6 +301,26 @@ select, button {
 
 #cardOverlay.fadeIn .card:nth-child(3) {
   animation-delay: 0.3s;
+}
+
+@media (max-width: 480px) {
+  .menu-card {
+    padding: 15px;
+    max-height: 85vh;
+  }
+  
+  .section {
+    margin: 5px;
+  }
+  
+  .section h3 {
+    font-size: 18px;
+    margin-bottom: 1px;
+  }
+  
+  .section p {
+    font-size: 14px;
+  }
 }
 
 @keyframes overlayFadeIn {
