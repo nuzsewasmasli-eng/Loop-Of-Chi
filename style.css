@@ -96,19 +96,12 @@ select, button {
   height: auto;
   aspect-ratio: 400 / 680;
   margin: auto;
-  margin-top: 20px;
+  margin-top: 2.4vw;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-@media (max-width: 480px) {
-  #game-container {
-    width: 100vw;
-    margin: 0;
-    margin-top: 10px;
-  }
-}
 
 #cardOverlay {
   position: absolute;
@@ -309,6 +302,12 @@ select, button {
     max-height: 85vh;
   }
   
+  #game-container {
+    width: 95vw;
+    margin: 0 auto;
+    margin-top: 5px;
+  }
+
   .section {
     margin: 5px;
   }
