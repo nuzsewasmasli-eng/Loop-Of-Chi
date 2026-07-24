@@ -43,7 +43,9 @@ function createNormalEnemy() {
         burnDamage: 0,
         isPoisoned: false,
         poisonDuration: 0,
-        poisonDamage: 0
+        poisonDamage: 0,
+        reservedDamage: 0,
+        expGranted: false
     };
 }
 
@@ -62,7 +64,9 @@ function createFastEnemy() {
         burnDamage: 0,
         isPoisoned: false,
         poisonDuration: 0,
-        poisonDamage: 0
+        poisonDamage: 0,
+        reservedDamage: 0,
+        expGranted: false
     }
 }
 
@@ -81,7 +85,9 @@ function createHeavyEnemy() {
         burnDamage: 0,
         isPoisoned: false,
         poisonDuration: 0,
-        poisonDamage: 0
+        poisonDamage: 0,
+        reservedDamage: 0,
+        expGranted: false
     }
 }
 

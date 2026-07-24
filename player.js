@@ -106,7 +106,7 @@ function findNearestEnemy() {
     let minDist = Infinity;
 
     for (const enemy of enemies) {
-        if (enemy.isDying || enemy.isDead) continue;
+        if (enemy.isDying || enemy.isDead || enemy.hp <= 0) continue;
         const dx = enemy.x - player.x;
         const dy = enemy.y - player.y;
 
@@ -246,6 +246,26 @@ function shootAtAngle(angle) {
 
     const shootOne = () => {
         const dmgMultiplier = playerEffects.doubleShot ? 0.55 : 1;
+        const dmg = player.damage * dmgMultiplier;
+
+        const target = findNearestEnemy();
+        let isLethal = false;
+
+        if (target) {
+            const effectiveHp = target.hp - target.reservedDamage;
+            if (effectiveHp - dmg <= 0) {
+                target.hp -= dmg;
+                isLethal = true;
+                if (!target.expGranted) {
+                    target.expGranted = true;
+                    const gainedExp = Math.round(target.exp + (1 + stats.level * 0.04));
+                    stats.exp += gainedExp;
+                    if (stats.exp >= stats.expToNext) levelUp();
+                }
+            }
+            target.reservedDamage += dmg;
+        }
+
         bullets.push({
             x: startX,
             y: startY,
@@ -253,16 +273,15 @@ function shootAtAngle(angle) {
             vy: Math.sin(angle) * 300,
             radius: bulletRadius,
             explosive: playerEffects.explosive,
-            damage: player.damage * dmgMultiplier,
+            damage: dmg,
+            isLethal,
             trail: [{ x: startX, y: startY }]
         });
     };
 
     if (!playerEffects.doubleShot) {
-
         shootOne();
     } else {
-
         shootOne();
         setTimeout(() => {
             shootOne();
@@ -298,44 +317,46 @@ function updateBullets(deltaTime) {
 
         for (let j = enemies.length - 1; j >= 0; j--) {
             const e = enemies[j];
-            if (e.isDying || e.isDead) continue;
+            if (e.isDead) continue;
             const dx = b.x - e.x;
             const dy = b.y - e.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist < b.radius + e.radius) {
-                const dmg = b.damage ?? player.damage;
-                e.hp -= dmg;
+                if (b.explosive) createExplosion(e.x, e.y);
 
-                if (Math.random() < playerEffects.burnChance) {
-                    e.isBurning = true;
-                    e.burnTime = playerEffects.burnDuration;
-                    e.burnDamage = playerEffects.burnDamage;
-                }
-
-                if (Math.random() < playerEffects.poisonChance) {
-                    e.isPoisoned = true;
-                    e.poisonDuration = (e.poisonDuration || 0) + playerEffects.poisonDuration;  // ← STACK!
-                    e.poisonDamage = playerEffects.poisonDamage;
-                }
-
-                if (b.explosive) {
-                    createExplosion(e.x, e.y);
-                }
+                e.reservedDamage -= b.damage;
                 bullets.splice(i, 1);
 
-                if (e.hp <= 0) {
-                    const gainedExp = Math.round(e.exp + (1 + stats.level * 0.04));
-                    stats.exp += gainedExp;
+                if (!b.isLethal) {
+                    e.hp -= b.damage;
 
-                    if (stats.exp >= stats.expToNext) {
-                        levelUp();
+                    if (Math.random() < playerEffects.burnChance) {
+                        e.isBurning = true;
+                        e.burnTime = playerEffects.burnDuration;
+                        e.burnDamage = playerEffects.burnDamage;
                     }
+                    if (Math.random() < playerEffects.poisonChance) {
+                        e.isPoisoned = true;
+                        e.poisonDuration = (e.poisonDuration || 0) + playerEffects.poisonDuration;
+                        e.poisonDamage = playerEffects.poisonDamage;
+                    }
+
+                    if (e.hp <= 0 && !e.expGranted) {
+                        e.expGranted = true;
+                        const gainedExp = Math.round(e.exp + (1 + stats.level * 0.04));
+                        stats.exp += gainedExp;
+                        if (stats.exp >= stats.expToNext) levelUp();
+                    }
+                }
+
+                addDamageText(e.x, e.y, Math.floor(b.damage), "normal");
+
+                // ← Bullet MANAPUN yang collide saat hp<=0, dialah trigger visual hilang
+                if (e.hp <= 0 && !e.isDying) {
                     e.isDying = true;
                     e.deathTimer = 300;
                 }
-
-                addDamageText(e.x, e.y, Math.floor(dmg), "normal");
 
                 break;
             }
@@ -355,7 +376,7 @@ function renderBullets(ctx) {
             ctx.moveTo(b.trail[i].x, b.trail[i].y);
             ctx.lineTo(b.trail[i + 1].x, b.trail[i + 1].y);
             ctx.stroke();
-        } 
+        }
 
         ctx.globalAlpha = 1;
         ctx.fillStyle = "#ffffffff";
@@ -388,10 +409,10 @@ function renderStats(ctx) {
     document.getElementById('expValue').textContent = `${stats.exp} / ${stats.expToNext}`;
     document.getElementById('burnValue').textContent = `${(playerEffects.burnChance * 100).toFixed(0)}%`;
     document.getElementById('poisonValue').textContent = `${(playerEffects.poisonChance * 100).toFixed(0)}%`;
-    
+
     const adrenalineContainer = document.getElementById('adrenalineContainer');
     const adrenalineValue = document.getElementById('adrenalineValue');
-    
+
     if (!playerEffects.adrenalineRush) {
         adrenalineValue.textContent = 'NOPE';
         adrenalineContainer.classList.remove('active');
